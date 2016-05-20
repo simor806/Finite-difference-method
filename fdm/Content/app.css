@@ -1,0 +1,37 @@
+﻿
+
+.vertical-center {
+    min-height: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.form-signin {
+    color: green;
+}
+
+.output{
+    overflow: overlay;
+}
+.row-title {
+    padding: 100px 0 0
+}
+
+/*Bootstrap styles*/
+.row {
+    padding: 30px 0; 
+}
+h4 {
+    margin-bottom: 30px;
+}
+.btn-lg {
+    min-width: 200px;
+}
+
+.container-fluid {
+    width: 100% !important;
+}
+label {
+    padding-left: 0 !important;
+}

@@ -1,0 +1,185 @@
+﻿@{
+    ViewBag.Title = "1d";
+}
+
+@model fdm.Models.FdmForOneDimension
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" type="text/css" href="~/Content/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/app.css" />
+    <script type="text/javascript" src="~/Scripts/Chart.js"></script>
+    <title>MRS 1D</title>
+</head>
+<body>
+    <div class="container container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                <h1>MRS 1D w czasie</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-md-3">
+                    <h4>Dane wejściowe</h4>
+                    @using (Html.BeginForm("fdm1D", "Home", FormMethod.Post, new { @class="form", role = "form-horizontal"} ))
+                    {
+                        <div class="form-group">
+                            @Html.Label("Liczba elementów siatki", new { @class = "col-xs-8" })
+                            <div class="col-xs-4">
+                                @Html.TextBoxFor(x => x.n, null, new { @class="form-control" })
+                            </div>
+                            @Html.ValidationMessageFor(x => x.n)
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Liczba iteracji ", new { @class = "col-xs-8" })
+                            <div class="col-xs-4">
+                                @Html.TextBoxFor(x => x.iteration, null, new { @class = "form-control" })
+                            </div>
+                            @Html.ValidationMessageFor(x => x.iteration)
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Krok czasowy", new { @class = "col-xs-8" })
+                            <div class="col-xs-4">
+                                @Html.TextBoxFor(x => x.dt, null, new { @class = "form-control" })
+                            </div>
+                            @Html.ValidationMessageFor(x => x.dt)
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Wartość brzegowa lewa", new { @class = "col-xs-8" })
+                            <div class="col-xs-4">
+                                @Html.TextBoxFor(x => x.boundaryValueLeft, null, new { @class = "form-control" })
+                            </div>
+                            @Html.ValidationMessageFor(x => x.boundaryValueLeft)
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Wartość brzegowa prawa", new { @class = "col-xs-8" })
+                            <div class="col-xs-4">
+                                @Html.TextBoxFor(x => x.boundaryValueRight, null, new { @class = "form-control" })
+                            </div>
+                            @Html.ValidationMessageFor(x => x.boundaryValueRight)
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Wartość początkowa", new { @class = "col-xs-8" })
+                            <div class="col-xs-4">
+                                @Html.TextBoxFor(x => x.initialValue, null, new { @class = "form-control" })
+                            </div>
+                            @Html.ValidationMessageFor(x => x.initialValue)
+                        </div>
+                        <input type="submit" value="Oblicz" class="btn btn-info"/>
+                    }
+            </div>
+            <div class="col-xs-12 col-md-5 output">
+                <h4>Dane wyjściowe</h4>
+                @if (ViewBag.ViewedWithChart)
+                {
+                    <div class="table-responsive">
+                        <table class="table">
+                            @for (int i = 0; i < ViewBag.ChartData.Length; i++)
+                            {
+                                <tr>
+                                    <td>Krok @i</td>
+                                    @foreach (double data in ViewBag.ChartData[i])
+                                    {
+                                        <td>@data</td>
+                                    }
+                                </tr>
+
+                            }   
+                        </table>
+                    </div>
+                }
+
+
+
+
+                    </div>
+            <div class="col-xs-12 col-md-4">
+                <h4>Wizualizacja</h4>
+                <canvas id="chartCanvas" width="420" height="230"></canvas>
+                <p id="canvasLegend"></p>
+            </div>
+    </div>
+
+@if (ViewBag.ViewedWithChart)
+{
+    var chart = new LineChart();
+    int scaleSteps = 10;
+    chart.ComplexData.Labels.AddRange(ViewBag.Labels);
+    
+    LineChartOptions options = chart.ChartConfiguration;
+    options.BezierCurve = false;
+    options.ScaleOverride = true;
+    options.ScaleStartValue = ViewBag.ScaleStartValue;
+    options.ScaleStepWidth = Math.Ceiling((ViewBag.ScaleMaxValue - ViewBag.ScaleStartValue) / scaleSteps);
+    options.ScaleSteps = scaleSteps;
+    options.Animation = false; 
+
+    List<ComplexDataset> datasets = new List<ComplexDataset>();
+
+    for (int i = 0; i < ViewBag.ChartData.Length; i++)
+    {
+        datasets.Add(new ComplexDataset
+        {
+            Data = ViewBag.ChartData[i],
+            Label = "Krok",
+            FillColor = "rgba(49,176,213,0.2)",
+            StrokeColor = "rgba(49,176,213,1)",
+            PointColor = "rgba(49,176,213,1)",
+            PointStrokeColor = "#fff",
+            PointHighlightFill = "#fff",
+            PointHighlightStroke = "rgba(220,220,220,1)",
+        });
+    }
+
+    chart.ComplexData.Datasets.AddRange(datasets);
+
+    @Html.CreateChart("chartCanvas", chart)
+}
+<script type="text/javascript" src="~/Scripts/jquery-1.9.1.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.input-validation-error').parents('.form-group').addClass('has-error');
+        $('.field-validation-error').addClass('text-danger');
+    });
+
+    var tmpDatasets = [];
+    $('document').ready(function(e){
+        if (window.chartCanvas_chart) {
+            var chart = window.chartCanvas_chart;
+            tmpDatasets = jQuery.extend(true, {}, chart.datasets);
+
+            chart.datasets = [];
+            chart.update();
+
+            animateChart();
+        }
+    })
+
+    function animateChart() {
+        var i = 0;
+        var chart = window.chartCanvas_chart;     
+        var $legendDiv = $("#canvasLegend");
+        setInterval(function () {
+            chart.datasets[0] = jQuery.extend(true, {}, tmpDatasets[i]);
+            chart.update();
+            $legendDiv.text("Krok: " + i);
+
+            if (i > Object.keys(tmpDatasets).length - 2) {
+                i = 0;
+            } else {
+                i = i + 1;
+            }
+        }, 2000);
+    }
+
+</script>
+</body>
+</html>
+

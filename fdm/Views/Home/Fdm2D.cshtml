@@ -1,0 +1,191 @@
+﻿@{
+    ViewBag.Title = "2d";
+    
+    var jss = new System.Web.Script.Serialization.JavaScriptSerializer();
+    var data = jss.Serialize(ViewBag.data);
+}
+
+@model fdm.Models.FdmForTwoDimension
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" type="text/css" href="~/Content/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/app.css" />
+    <script type="text/javascript" src="~/Scripts/Chart.js"></script>
+    <title>MRS 2D</title>
+</head>
+<body>
+    <div class="container container-fluid">
+        <div class="row">
+            <div class="col-xs-12">
+                <h1>MRS 2D w przestrzeni</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-md-3">
+                <h4>Dane wejściowe</h4>
+                @using (Html.BeginForm("fdm2D", "Home", FormMethod.Post, new { @class = "form", role = "form-horizontal" }))
+                {
+                    <div class="form-group">
+                        @Html.Label("Liczba elementów siatki", new { @class = "col-xs-8" })
+                        <div class="col-xs-4">
+                            @Html.TextBoxFor(x => x.n, null, new { @class = "form-control" })
+                        </div>
+                        @Html.ValidationMessageFor(x => x.n)
+                    </div>
+                    <div class="form-group">
+                        @Html.Label("Wartość brzegowa lewa", new { @class = "col-xs-8" })
+                        <div class="col-xs-4">
+                            @Html.TextBoxFor(x => x.boundaryValueLeft, null, new { @class = "form-control" })
+                        </div>
+                        @Html.ValidationMessageFor(x => x.boundaryValueLeft)
+                    </div>
+                    <div class="form-group">
+                        @Html.Label("Wartość brzegowa górna", new { @class = "col-xs-8" })
+                        <div class="col-xs-4">
+                            @Html.TextBoxFor(x => x.boundaryValueTop, null, new { @class = "form-control" })
+                        </div>
+                        @Html.ValidationMessageFor(x => x.boundaryValueTop)
+                    </div>
+                    <div class="form-group">
+                        @Html.Label("Wartość brzegowa prawa", new { @class = "col-xs-8" })
+                        <div class="col-xs-4">
+                            @Html.TextBoxFor(x => x.boundaryValueRight, null, new { @class = "form-control" })
+                        </div>
+                        @Html.ValidationMessageFor(x => x.boundaryValueRight)
+                    </div>
+                    <div class="form-group">
+                        @Html.Label("Wartość brzegowa dolna", new { @class = "col-xs-8" })
+                        <div class="col-xs-4">
+                            @Html.TextBoxFor(x => x.boundaryValueBottom, null, new { @class = "form-control" })
+                        </div>
+                        @Html.ValidationMessageFor(x => x.boundaryValueBottom)
+                    </div>
+                    <input type="submit" value="Oblicz" class="btn btn-info" />
+                }
+            </div>
+            <div class="col-xs-12 col-md-5 output">
+                <h4>Dane wyjściowe</h4>
+                @if (ViewBag.ViewedWithChart)
+                {
+                    <div class="table-responsive">
+                        <table class="table">
+                            @for (int i = 0; i < ViewBag.ChartData.Length; i++)
+                            {
+                                <tr>
+                                    @foreach (double chartData in ViewBag.ChartData[i])
+                                    {
+                                        <td>@chartData</td>
+                                    }
+                                </tr>
+
+                            }
+                        </table>
+                    </div>
+                }
+
+
+
+
+            </div>
+            <div class="col-xs-12 col-md-4">
+                <h4>Wizualizacja</h4>
+                <canvas id="chartCanvas" width="420" height="340"></canvas>
+                <p id="canvasLegend"></p>
+            </div>
+        </div>
+
+        <script type="text/javascript" src="~/Scripts/jquery-1.9.1.min.js"></script>
+        <script type="text/javascript" src="~/Scripts/paper-full.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $('.input-validation-error').parents('.form-group').addClass('has-error');
+                $('.field-validation-error').addClass('text-danger');
+            });
+
+
+            $('document').ready(function(e){
+                var userInfo = JSON.parse(@Html.Raw(data));
+
+                console.log(userInfo);
+            })
+
+    </script>
+    <script type="text/paperscript" canvas="chartCanvas">
+    var $nInput = $('input[name=n]');
+    $nInput.on('change', function(){
+        var n = $nInput.val();
+        console.log(n);
+        project.activeLayer.removeChildren();
+        drawChart();
+        if (n % 1 === 0){
+            drawArea(n);
+        }
+    });
+
+    var n = $nInput.val();
+
+
+    var maxWidth = view.size.width;
+    var maxHeight = view.size.height;
+    var margin = 10;
+    var areaSize = 300;
+    var startPoint = new Point(margin, maxHeight - margin);
+
+
+
+    drawChart();
+    drawArea(n);
+ 
+
+    function drawChart() {
+        var xAxisEndPoint = new Point(maxWidth - margin, maxHeight - margin);
+        var yAxisEndPoint = new Point(margin, margin);
+
+        var xAxis = new Path.Line(startPoint, xAxisEndPoint);
+        xAxis.strokeColor = 'grey';
+        var yAxis = new Path.Line(startPoint, yAxisEndPoint);
+        yAxis.strokeColor = 'grey';
+
+        var arrowSides = 3;
+        var arrowRadius = 10;
+
+        var xAxisArrow = new Path.RegularPolygon(xAxisEndPoint, arrowSides, arrowRadius);
+        xAxisArrow.fillColor = 'grey';
+        xAxisArrow.rotate(90, xAxisEndPoint);
+
+        var yAxisArrow = new Path.RegularPolygon(yAxisEndPoint, arrowSides, arrowRadius);
+        yAxisArrow.fillColor = 'grey';
+    }
+
+
+    function drawArea(n) {
+        var area = new Shape.Rectangle(startPoint, startPoint + [areaSize, -areaSize]);
+        area.strokeColor = 'black';
+
+        var areaStep = areaSize / n;
+
+        for (var i = 1; i < n; i++) {
+            var from = startPoint - [0, i * areaStep];
+            var to = from + [areaSize, 0];
+            var areaHorizontalLine = new Path.Line(from, to);
+            areaHorizontalLine.strokeColor = 'black';
+        }
+
+        for (var i = 1; i < n; i++) {
+            var from = startPoint + [i * areaStep, 0];
+            var to = from - [0, areaSize];
+            var areaVerticalLine = new Path.Line(from, to);
+            areaVerticalLine.strokeColor = 'black';
+        }
+    }
+    </script>
+</body>
+</html>
