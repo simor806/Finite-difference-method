@@ -2,7 +2,9 @@
     ViewBag.Title = "2d";
     
     var jss = new System.Web.Script.Serialization.JavaScriptSerializer();
-    var data = jss.Serialize(ViewBag.data);
+    var data = jss.Serialize(ViewBag.Data);
+    var maxValue = jss.Serialize(ViewBag.MaxValue);
+    var minValue = jss.Serialize(ViewBag.MinValue);
 }
 
 @model fdm.Models.FdmForTwoDimension
@@ -97,7 +99,7 @@
             </div>
             <div class="col-xs-12 col-md-4">
                 <h4>Wizualizacja</h4>
-                <canvas id="chartCanvas" width="420" height="340"></canvas>
+                <canvas id="chartCanvas" width="420" height="420"></canvas>
                 <p id="canvasLegend"></p>
             </div>
         </div>
@@ -109,14 +111,6 @@
                 $('.input-validation-error').parents('.form-group').addClass('has-error');
                 $('.field-validation-error').addClass('text-danger');
             });
-
-
-            $('document').ready(function(e){
-                var userInfo = JSON.parse(@Html.Raw(data));
-
-                console.log(userInfo);
-            })
-
     </script>
     <script type="text/paperscript" canvas="chartCanvas">
     var $nInput = $('input[name=n]');
@@ -132,10 +126,12 @@
 
     var n = $nInput.val();
 
-
+    var maxChartValue = JSON.parse(@Html.Raw(maxValue));
+    var minChartValue = JSON.parse(@Html.Raw(minValue));
+    console.log("max" + maxChartValue);
     var maxWidth = view.size.width;
     var maxHeight = view.size.height;
-    var margin = 10;
+    var margin = 40;
     var areaSize = 300;
     var startPoint = new Point(margin, maxHeight - margin);
 
@@ -143,7 +139,8 @@
 
     drawChart();
     drawArea(n);
- 
+    drawData(n);
+
 
     function drawChart() {
         var xAxisEndPoint = new Point(maxWidth - margin, maxHeight - margin);
@@ -185,6 +182,24 @@
             var areaVerticalLine = new Path.Line(from, to);
             areaVerticalLine.strokeColor = 'black';
         }
+    }
+
+    function drawData(n) {
+        var areaStep = areaSize / n;
+
+        var rectSize = new Size(areaStep, areaStep);
+
+        for (var i = 0; i <= n; i++) {
+            for (var j = 0; j <= n; j++) {
+                var rectPoint = startPoint + [i * areaStep, -j * areaStep];
+                rectPoint -= areaStep / 2; 
+
+                var rect = new Shape.Rectangle(rectPoint, rectSize);
+                rect.strokeColor = 'red';
+            }
+        }
+
+
     }
     </script>
 </body>
