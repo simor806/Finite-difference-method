@@ -54,10 +54,10 @@ namespace fdm.Models
                         A[i][i + 1] = 1;
 
                     }
-                    if (i + 3 < matrixSize)
+                    if (i + (n - 1) < matrixSize)
                     {
-                        A[i + 3][i] = 1;
-                        A[i][i + 3] = 1;
+                        A[i + (n - 1)][i] = 1;
+                        A[i][i + (n - 1)] = 1;
                     }
             }
 
