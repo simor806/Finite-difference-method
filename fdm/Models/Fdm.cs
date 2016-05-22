@@ -9,7 +9,7 @@ namespace fdm.Models
     public class Fdm
     {
         [Required(ErrorMessage = "Proszę o podanie liczby elementów siatki")]
-        [Range(1, 20, ErrorMessage = "Proszę o podanie liczby całkowitej z zakresu  od 1 do 20")]
+        [Range(2, 20, ErrorMessage = "Proszę o podanie liczby całkowitej z zakresu  od 1 do 20")]
         public int n { get; set; }
 
         [Required(ErrorMessage = "Proszę o podanie wartości brzegowej lewej")]
