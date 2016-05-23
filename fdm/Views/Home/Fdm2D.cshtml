@@ -27,12 +27,12 @@
     <div class="container container-fluid">
         <div class="row">
             <div class="col-xs-12">
-                <h1>MRS 2D w przestrzeni</h1>
+                <h1><a href="@Url.Action("Index", "Home")" class="home"><span class="glyphicon glyphicon-home" aria-hidden="true"></span></a>MRS 2D w przestrzeni</h1>
             </div>
         </div>
         <div class="row">
             <div class="col-xs-12 col-md-3">
-                <h4>Dane wejściowe</h4>
+                <h4><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Dane wejściowe</h4>
                 @using (Html.BeginForm("fdm2D", "Home", FormMethod.Post, new { @class = "form", role = "form-horizontal" }))
                 {
                     <div class="form-group">
@@ -74,7 +74,7 @@
                 }
             </div>
             <div class="col-xs-12 col-md-5 output">
-                <h4>Dane wyjściowe</h4>
+                <h4><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>Dane wyjściowe</h4>
                 @if (ViewBag.ViewedWithChart)
                 {
                     <div class="table-responsive">
@@ -94,7 +94,7 @@
                 }
             </div>
             <div class="col-xs-12 col-md-4">
-                <h4>Wizualizacja</h4>
+                <h4><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>Wizualizacja</h4>
                 <canvas id="chartCanvas" width="420" height="420"></canvas>
             </div>
         </div>
