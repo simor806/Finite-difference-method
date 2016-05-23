@@ -143,12 +143,10 @@
     @Html.CreateChart("chartCanvas", chart)
 }
 <script type="text/javascript" src="~/Scripts/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="~/Scripts/app.js"></script>
 <script type="text/javascript">
-    $(document).ready(function () {
-        $('.input-validation-error').parents('.form-group').addClass('has-error');
-        $('.field-validation-error').addClass('text-danger');
-    });
 
+    //zapamiętanie danych w tablicy
     var tmpDatasets = [];
     $('document').ready(function(e){
         if (window.chartCanvas_chart) {
