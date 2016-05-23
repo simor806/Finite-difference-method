@@ -2,7 +2,9 @@
     ViewBag.Title = "2d";
     
     var jss = new System.Web.Script.Serialization.JavaScriptSerializer();
-    var data = jss.Serialize(ViewBag.data);
+    var data = jss.Serialize(ViewBag.Data);
+    var maxValue = jss.Serialize(ViewBag.MaxValue);
+    var minValue = jss.Serialize(ViewBag.MinValue);
 }
 
 @model fdm.Models.FdmForTwoDimension
@@ -90,62 +92,48 @@
                         </table>
                     </div>
                 }
-
-
-
-
             </div>
             <div class="col-xs-12 col-md-4">
                 <h4>Wizualizacja</h4>
-                <canvas id="chartCanvas" width="420" height="340"></canvas>
-                <p id="canvasLegend"></p>
+                <canvas id="chartCanvas" width="420" height="420"></canvas>
             </div>
         </div>
 
-        <script type="text/javascript" src="~/Scripts/jquery-1.9.1.min.js"></script>
-        <script type="text/javascript" src="~/Scripts/paper-full.min.js"></script>
-        <script type="text/javascript">
-            $(document).ready(function () {
-                $('.input-validation-error').parents('.form-group').addClass('has-error');
-                $('.field-validation-error').addClass('text-danger');
-            });
-
-
-            $('document').ready(function(e){
-                var userInfo = JSON.parse(@Html.Raw(data));
-
-                console.log(userInfo);
-            })
-
-    </script>
+    <script type="text/javascript" src="~/Scripts/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="~/Scripts/app.js"></script>
+    <script type="text/javascript" src="~/Scripts/paper-full.min.js"></script>
     <script type="text/paperscript" canvas="chartCanvas">
+    //przy zmianie ilości elementów wykres rysowany jest na nowo
     var $nInput = $('input[name=n]');
     $nInput.on('change', function(){
         var n = $nInput.val();
-        console.log(n);
         project.activeLayer.removeChildren();
-        drawChart();
+        drawAxis();
         if (n % 1 === 0){
             drawArea(n);
         }
     });
 
+    //zmienne globalne
     var n = $nInput.val();
-
-
+    var maxChartValue = JSON.parse(@Html.Raw(maxValue));
+    var minChartValue = JSON.parse(@Html.Raw(minValue));
+    var data = JSON.parse(@Html.Raw(data));
     var maxWidth = view.size.width;
     var maxHeight = view.size.height;
-    var margin = 10;
+    var margin = 40;
     var areaSize = 300;
     var startPoint = new Point(margin, maxHeight - margin);
 
-
-
-    drawChart();
+    //wywołanie rysowania wykresu
+    drawAxis();
     drawArea(n);
- 
+    if (data) {
+        drawData(n, data);
+    }
 
-    function drawChart() {
+    //rysowanie osi wykresu
+    function drawAxis() {
         var xAxisEndPoint = new Point(maxWidth - margin, maxHeight - margin);
         var yAxisEndPoint = new Point(margin, margin);
 
@@ -164,8 +152,8 @@
         var yAxisArrow = new Path.RegularPolygon(yAxisEndPoint, arrowSides, arrowRadius);
         yAxisArrow.fillColor = 'grey';
     }
-
-
+    
+    //rysowanie siatki
     function drawArea(n) {
         var area = new Shape.Rectangle(startPoint, startPoint + [areaSize, -areaSize]);
         area.strokeColor = 'black';
@@ -185,6 +173,70 @@
             var areaVerticalLine = new Path.Line(from, to);
             areaVerticalLine.strokeColor = 'black';
         }
+    }
+
+    //wizualizacja danych
+    function drawData(n, data) {
+        var areaStep = areaSize / n;
+        var rectSize = new Size(areaStep, areaStep);
+
+        for (var i = 0; i <= n; i++) {
+            for (var j = 0, k = n; j <= n; j++, k--) {
+                var centerPoint = startPoint + [i * areaStep, -j * areaStep];
+                var rectPoint = centerPoint - areaStep / 2;
+
+                var rect = new Shape.Rectangle(rectPoint, rectSize);
+
+                var greyValue = 1 - ((data[i][k] - minChartValue) / (maxChartValue - minChartValue));
+                rect.fillColor = new Color(greyValue, 0.5);
+
+                rect.data.value = data[i][k];
+
+                rect.onMouseEnter = function(event) {
+                    this.strokeColor = '#5bc0de';
+                    this.strokeWidth = 3;
+                    
+                    var tooltip = createTooltip(this);
+
+                    this.onMouseLeave = function(event) {
+                        this.strokeColor = null;
+                        tooltip.remove();
+                    }
+                }
+
+                var circle = new Shape.Circle(centerPoint, 2);
+                circle.fillColor = 'black';
+            }
+        }
+    }
+
+    //rysowanie chmurek z obliczonymi wartościami
+    function createTooltip(rect){
+        var backgroundColor = new Color(0, 0, 0, 0.8)
+
+        var triangle = new Path.RegularPolygon(rect.position - [0, 13], 3, 5);
+        triangle.fillColor = backgroundColor;
+        triangle.rotate(180, rect.position - [0, 13]);
+
+        var rectangle = new Rectangle(rect.position - [30, 35], new Size(60, 20));
+
+        var cornerSize = new Size(6, 6);
+
+        var background = new Shape.Rectangle(rectangle, cornerSize);
+        background.fillColor = backgroundColor;
+
+        var text = new PointText({
+            point: rect.position - [5, 20],
+            fontSize: 12,
+            content: rect.data.value,
+            fillColor: 'white'
+        });
+
+        var tooltipGroup = new Group({
+            children: [triangle, background, text]
+        });
+
+        return tooltipGroup;
     }
     </script>
 </body>

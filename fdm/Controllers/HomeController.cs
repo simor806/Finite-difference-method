@@ -85,36 +85,22 @@ namespace fdm.Controllers
             {
                 double[][] result = fdm2d.TwoDimensionInSpace(false);
 
-                JavaScriptSerializer js = new JavaScriptSerializer();
-                string json = js.Serialize(result);
+                JavaScriptSerializer jss = new JavaScriptSerializer();
+                string resultJson = jss.Serialize(result);
                 
-                
-                
-                //string[] labels = new string[fdm2d.n];
                 List<double>[] dataList = new List<double>[fdm2d.n + 1];
-
-                //dataList[0] = new List<double>();
-                //dataList[0].Add(fdm1d.boundaryValueLeft);
-                //for (int i = 1; i < fdm1d.n - 1; i++)
-                //    dataList[0].Add(fdm1d.initialValue);
-                //dataList[0].Add(fdm1d.boundaryValueRight);
-
                 for (int i = 0; i <= fdm2d.n; i++)
                 {
                     dataList[i] = new List<double>();
-                    for (int j = 0; j <= fdm2d.n; j++)
-                    {
-                        //labels[j] = (j + 1).ToString();
+                    for (int j = 0; j <= fdm2d.n; j++)                 
                         dataList[i].Add(result[j][i]);
-                    }
                 }
 
-                //double[] chartValues = { fdm1d.boundaryValueLeft, fdm1d.initialValue, fdm1d.boundaryValueRight };
+                double[] boundaryValues = { fdm2d.boundaryValueLeft, fdm2d.boundaryValueTop, fdm2d.boundaryValueRight, fdm2d.boundaryValueBottom };
 
-                //ViewBag.ScaleMaxValue = chartValues.Max();
-                //ViewBag.ScaleStartValue = (int)chartValues.Min();
-                //ViewBag.Labels = labels;
-                ViewBag.data = json;
+                ViewBag.MinValue = jss.Serialize(boundaryValues.Min());
+                ViewBag.MaxValue = jss.Serialize(boundaryValues.Max());
+                ViewBag.Data = resultJson;
                 ViewBag.ChartData = dataList;
                 ViewBag.ViewedWithChart = true;
 

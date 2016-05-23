@@ -39,6 +39,10 @@ namespace fdm.Models
                 BV[n][i] = boundaryValueRight;
                 BV[i][n] = boundaryValueBottom;
             }
+            BV[0][0] = (BV[0][1] + BV[1][0]) / 2;
+            BV[0][n] = (BV[0][n - 1] + BV[1][n]) / 2;
+            BV[n][0] = (BV[n - 1][0] + BV[n][1]) / 2;
+            BV[n][n] = (BV[n - 1][n] + BV[n][n - 1]) / 2;
 
             //macierz współczynników (macierz siedmioprzekątniowa na podstwie ksiązki Majchrzak str. 218)
             int matrixSize = (int)Math.Pow((n - 1), 2);
@@ -54,10 +58,10 @@ namespace fdm.Models
                         A[i][i + 1] = 1;
 
                     }
-                    if (i + 3 < matrixSize)
+                    if (i + (n - 1) < matrixSize)
                     {
-                        A[i + 3][i] = 1;
-                        A[i][i + 3] = 1;
+                        A[i + (n - 1)][i] = 1;
+                        A[i][i + (n - 1)] = 1;
                     }
             }
 
