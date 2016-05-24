@@ -99,10 +99,16 @@
         <div class="col-xs-12 col-md-4">
             <h4><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>Wizualizacja</h4>
             <canvas id="chartCanvas" width="420" height="230"></canvas>
-            <p id="canvasLegend"></p>
+            @if (ViewBag.ViewedWithChart)
+            {
+                <div>
+                    <span id="canvasLegend"></span><br />
+                    Szybkość wizualizacji: <span id="visualisationTimeLabel"></span> <input type="range" id="visualisationTimeRange" min="1" max="6">
+                </div>
+            }
         </div>
     </div>
-
+@*Biblioteka do rysowania wykresu: https://github.com/martinobordin/Chart.Mvc*@
 @if (ViewBag.ViewedWithChart)
 {
     var chart = new LineChart();
@@ -159,9 +165,10 @@
     //animacja poszczególnych danych z tablicy
     function animateChart() {
         var i = 0;
-        var chart = window.chartCanvas_chart;     
+        var chart = window.chartCanvas_chart;
         var $legendDiv = $("#canvasLegend");
-        setInterval(function () {
+
+        function changeDataChart() {
             chart.datasets[0] = jQuery.extend(true, {}, tmpDatasets[i]);
             chart.update();
             $legendDiv.text("Krok: " + i);
@@ -171,9 +178,15 @@
             } else {
                 i = i + 1;
             }
-        }, 2000);
-    }
+        };
 
+        (function repeat() {
+            var visualisationTime = $("#visualisationTimeRange").val() * 500;
+            $("#visualisationTimeLabel").text($("#visualisationTimeLabel").val() + $("#visualisationTimeRange").val());
+            changeDataChart();
+            var timer = setTimeout(repeat, visualisationTime);
+        })();
+    }
 </script>
 </body>
 </html>
