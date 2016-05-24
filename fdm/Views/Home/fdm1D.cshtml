@@ -103,7 +103,7 @@
             {
                 <div>
                     <span id="canvasLegend"></span><br />
-                    Szybkość wizualizacji: <span id="visualisationTimeLabel"></span> <input type="range" id="visualisationTimeRange" min="1" max="6">
+                    Czas wizualizacji: <span id="visualisationTimeLabel"></span> <input type="range" id="visualisationTimeRange" min="1" max="6">
                 </div>
             }
         </div>
@@ -182,7 +182,7 @@
 
         (function repeat() {
             var visualisationTime = $("#visualisationTimeRange").val() * 500;
-            $("#visualisationTimeLabel").text($("#visualisationTimeLabel").val() + $("#visualisationTimeRange").val());
+            $("#visualisationTimeLabel").text($("#visualisationTimeLabel").val() + $("#visualisationTimeRange").val() / 2 + ' s');
             changeDataChart();
             var timer = setTimeout(repeat, visualisationTime);
         })();
